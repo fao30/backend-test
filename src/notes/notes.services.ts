@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Note, NoteDocument } from './note.model';
-
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { Note, NoteDocument } from "./note.model";
+import * as ExcelJS from "exceljs";
 @Injectable()
 export class NotesService {
   constructor(@InjectModel(Note.name) private noteModel: Model<NoteDocument>) {}
@@ -16,10 +16,31 @@ export class NotesService {
     return this.noteModel.find().exec();
   }
 
+  async exportToExcel(notes: Note[]): Promise<Buffer> {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Notes");
+
+    worksheet.columns = [
+      { header: "Загаловок", key: "title", width: 20 },
+      { header: "Описание", key: "description", width: 40 },
+    ];
+
+    notes.forEach((note) => {
+      worksheet.addRow({
+        title: note.title,
+        description: note.description,
+      });
+    });
+
+    const bufferArray = await workbook.xlsx.writeBuffer();
+    const buffer = Buffer.from(bufferArray);
+    return buffer;
+  }
+
   async findOne(id: string): Promise<Note> {
     const note = await this.noteModel.findById(id).exec();
     if (!note) {
-      throw new NotFoundException('Note not found');
+      throw new NotFoundException("Note not found");
     }
     return note;
   }
@@ -29,7 +50,7 @@ export class NotesService {
       .findByIdAndUpdate(id, updateNoteDto, { new: true })
       .exec();
     if (!updatedNote) {
-      throw new NotFoundException('Note not found');
+      throw new NotFoundException("Note not found");
     }
     return updatedNote;
   }
@@ -37,7 +58,7 @@ export class NotesService {
   async remove(id: string): Promise<void> {
     const result = await this.noteModel.deleteOne({ _id: id }).exec();
     if (result.deletedCount === 0) {
-      throw new NotFoundException('Note not found');
+      throw new NotFoundException("Note not found");
     }
   }
 }
