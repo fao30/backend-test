@@ -1,18 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import { Injectable } from "@nestjs/common";
+import { UsersService } from "../users/users.service";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService,
+    private jwtService: JwtService
   ) {}
 
   async comparePasswords(
     textPassword: string,
-    hashedPass: string,
+    hashedPass: string
   ): Promise<boolean> {
     return await bcrypt.compare(textPassword, hashedPass);
   }
@@ -41,7 +41,7 @@ export class AuthService {
     const user = await this.usersService.findOne(username);
 
     if (user && (await this.comparePasswords(password, user.password))) {
-      const payload = { sub: username };
+      const payload = { username, id: user._id };
       return {
         access_token: this.jwtService.sign(payload),
       };
