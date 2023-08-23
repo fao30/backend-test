@@ -1,16 +1,17 @@
-import { Module, forwardRef } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UsersController } from './users/users.controller';
-import { UsersModule } from './users/users.module';
-import { MongooseModule } from '@nestjs/mongoose';
-import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
-import { AuthService } from './auth/auth.service';
-import { NotesModule } from './notes/notes.module';
-import { AuthModule } from './auth/auth.module';
-import { AuthController } from './auth/auth.controller';
-import { ConfigModule } from '@nestjs/config';
+import { Module, ValidationPipe, forwardRef } from "@nestjs/common";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import { UsersController } from "./users/users.controller";
+import { UsersModule } from "./users/users.module";
+import { MongooseModule } from "@nestjs/mongoose";
+import { PassportModule } from "@nestjs/passport";
+import { JwtModule } from "@nestjs/jwt";
+import { AuthService } from "./auth/auth.service";
+import { NotesModule } from "./notes/notes.module";
+import { AuthModule } from "./auth/auth.module";
+import { AuthController } from "./auth/auth.controller";
+import { ConfigModule } from "@nestjs/config";
+import { APP_PIPE } from "@nestjs/core";
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { ConfigModule } from '@nestjs/config';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: "1h" },
     }),
     UsersModule,
     NotesModule,
@@ -28,6 +29,10 @@ import { ConfigModule } from '@nestjs/config';
   ],
   controllers: [AppController, UsersController, AuthController],
   providers: [
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
+    },
     AppService,
     // UsersService,
     AuthService,

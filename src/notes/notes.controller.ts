@@ -7,18 +7,19 @@ import {
   Param,
   Body,
   UseGuards,
-} from '@nestjs/common';
-import { NotesService } from './notes.services';
-import { Note } from './note.model';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+} from "@nestjs/common";
+import { NotesService } from "./notes.services";
+import { Note } from "./note.model";
+import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import { CreateNoteDto, EditNoteDto } from "./classNotes";
 
-@Controller('notes')
+@Controller("notes")
 export class NotesController {
   constructor(private notesService: NotesService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() createNoteDto: Partial<Note>): Promise<Note> {
+  async create(@Body() createNoteDto: CreateNoteDto): Promise<Note> {
     return this.notesService.create(createNoteDto);
   }
 
@@ -29,23 +30,23 @@ export class NotesController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Note> {
+  @Get(":id")
+  async findOne(@Param("id") id: string): Promise<Note> {
     return this.notesService.findOne(id);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put(':id')
+  @Put(":id")
   async update(
-    @Param('id') id: string,
-    @Body() updateNoteDto: Partial<Note>,
+    @Param("id") id: string,
+    @Body() updateNoteDto: EditNoteDto
   ): Promise<Note> {
     return this.notesService.update(id, updateNoteDto);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
+  @Delete(":id")
+  async remove(@Param("id") id: string): Promise<void> {
     return this.notesService.remove(id);
   }
 }
