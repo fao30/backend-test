@@ -12,8 +12,25 @@ export class NotesService {
     return createdNote.save();
   }
 
-  async findAll(): Promise<Note[]> {
-    return this.noteModel.find().exec();
+  async findAll(
+    sortFields?: { field: string; order: string }[]
+  ): Promise<Note[]> {
+    const sortOptions = {};
+
+    if (sortFields?.length) {
+      for (const sortField of sortFields) {
+        const { field, order } = sortField;
+        if (
+          field === "timestamp" ||
+          field === "title" ||
+          field === "description"
+        ) {
+          sortOptions[field] = order === "asc" ? 1 : -1; // Use 1 for ascending, -1 for descending
+        }
+      }
+    }
+
+    return this.noteModel.find().sort(sortOptions).exec();
   }
 
   async exportToExcel(notes: Note[]): Promise<Buffer> {

@@ -8,6 +8,7 @@ import {
   Param,
   Body,
   UseGuards,
+  Query,
 } from "@nestjs/common";
 import { NotesService } from "./notes.services";
 import { Note } from "./note.model";
@@ -27,7 +28,21 @@ export class NotesController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async findAll(): Promise<Note[]> {
+  async findAll(
+    @Query("sortBy") sortBy: string,
+    @Query("sortOrder") sortOrder: string
+  ): Promise<Note[]> {
+    if (sortBy) {
+      const sortByArray = sortBy.split(",");
+      const sortOrderArray = sortOrder.split(",");
+
+      const sortFields = sortByArray.map((field, index) => ({
+        field,
+        order: sortOrderArray[index] || "asc",
+      }));
+
+      return this.notesService.findAll(sortFields);
+    }
     return this.notesService.findAll();
   }
 
